@@ -26,10 +26,16 @@ Feature: Instructor Scheduling and Assignment
     Then the assignment should fail
     And an error message indicating a time conflict should be returned
 
-  Scenario: Assign instructor with automatic time slot adjustment (complex logic)
+  Scenario: Assign instructor with automatic time slot adjustment (successful)
     Given a course "Machine Learning" is scheduled from 09:00 to 11:00
-    And an instructor "Dr. White" is busy from 09:30 to 10:30
+    And an instructor "Dr. White" is busy from 09:00 to 10:00
     When an administrator assigns "Dr. White" to "Machine Learning"
     Then the system should attempt to find an alternative time slot for "Machine Learning" with "Dr. White"
     And if a suitable alternative is found, "Dr. White" should be assigned to "Machine Learning" at the new time
+
+  Scenario: Assign instructor with automatic time slot adjustment (no suitable alternative)
+    Given a course "Advanced Machine Learning" is scheduled from 09:00 to 11:00
+    And an instructor "Dr. White" is busy from 08:00 to 12:00
+    When an administrator assigns "Dr. White" to "Advanced Machine Learning"
+    Then the system should attempt to find an alternative time slot for "Advanced Machine Learning" with "Dr. White"
     And if no suitable alternative is found, an error message indicating no available slot should be returned

@@ -144,7 +144,6 @@ class CourseManagementSystem:
 
             new_start_time = str(int(original_start_time.split(':')[0]) + 1).zfill(2) + ':' + original_start_time.split(':')[1]
             new_end_time = str(int(original_end_time.split(':')[0]) + 1).zfill(2) + ':' + original_end_time.split(':')[1]
-
             if not self.has_time_conflict(instructor_name, new_start_time, new_end_time):
                 course.start_time = new_start_time
                 course.end_time = new_end_time
@@ -161,7 +160,6 @@ class CourseManagementSystem:
     def has_time_conflict(self, instructor_name, start_time, end_time):
         instructor = self.get_instructor(instructor_name)
         if not instructor:
-            print(f"DEBUG: Instructor {instructor_name} not found for time conflict check.")
             return False
         
         def time_to_minutes(time_str):
@@ -171,14 +169,10 @@ class CourseManagementSystem:
         new_start_minutes = time_to_minutes(start_time)
         new_end_minutes = time_to_minutes(end_time)
 
-        print(f"DEBUG: Checking conflict for {instructor_name} with new slot {start_time}-{end_time} ({new_start_minutes}-{new_end_minutes} minutes)")
         for assigned_course_name, assigned_start_str, assigned_end_str in instructor.schedule:
             assigned_start_minutes = time_to_minutes(assigned_start_str)
             assigned_end_minutes = time_to_minutes(assigned_end_str)
-            print(f"DEBUG:   Comparing with assigned slot {assigned_course_name} {assigned_start_str}-{assigned_end_str} ({assigned_start_minutes}-{assigned_end_minutes} minutes)")
 
             if (new_start_minutes < assigned_end_minutes and new_end_minutes > assigned_start_minutes):
-                print("DEBUG:   Conflict detected!")
                 return True # Conflict
-        print("DEBUG: No conflict detected.")
         return False

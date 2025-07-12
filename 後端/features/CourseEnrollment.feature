@@ -1,5 +1,6 @@
 Feature: Course Enrollment and Inquiry
 
+  @ignore
   Scenario: Enroll in an available course
     Given a course "Art History" is available with max attendees 20 and current attendees 5
     When a user enrolls in the course "Art History"

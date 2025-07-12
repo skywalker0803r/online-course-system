@@ -117,6 +117,14 @@ def assign_instructor(course_name: str, instructor: InstructorRequest):
         raise HTTPException(status_code=400, detail=str(e))
     return {"message": "Instructor assigned successfully"}
 
+@app.post("/api/courses/{course_name}/assign_instructor_with_adjustment")
+def assign_instructor_with_adjustment(course_name: str, instructor: InstructorRequest):
+    try:
+        cms.assign_instructor_to_course_with_adjustment(instructor.instructor_name, course_name)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": "Instructor assigned successfully with time adjustment"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

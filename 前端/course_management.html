@@ -49,6 +49,28 @@
         </div>
     </div>
 
+    <!-- Edit Course Modal -->
+    <div id="edit-course-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Edit Course</h3>
+            <form id="edit-course-form">
+                <input type="hidden" id="edit-course-name">
+                <div class="mt-2">
+                    <label for="edit-course-description" class="block text-sm font-medium text-gray-700">Description</label>
+                    <input type="text" id="edit-course-description" class="mt-1 p-2 border rounded w-full">
+                </div>
+                <div class="mt-2">
+                    <label for="edit-course-max-attendees" class="block text-sm font-medium text-gray-700">Max Attendees</label>
+                    <input type="number" id="edit-course-max-attendees" class="mt-1 p-2 border rounded w-full">
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="save-course-changes" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">Save</button>
+                    <button id="cancel-edit" class="mt-2 px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function() {
             const apiUrl = 'http://127.0.0.1:8000/api';
@@ -67,6 +89,7 @@
                                 <td class="p-2">${course.start_time}</td>
                                 <td class="p-2">${course.end_time}</td>
                                 <td class="p-2">
+                                    <button class="bg-yellow-500 text-white p-1 rounded edit-course" data-course-name="${course.name}" data-course-description="${course.description}" data-course-max-attendees="${course.max_attendees}">Edit</button>
                                     <button class="bg-red-500 text-white p-1 rounded delete-course" data-course-name="${course.name}">Delete</button>
                                 </td>
                             </tr>
@@ -112,6 +135,49 @@
                     },
                     error: function(xhr) {
                         alert('Error deleting course: ' + xhr.responseJSON.detail);
+                    }
+                });
+            });
+
+            // Show edit modal
+            $('#course-list').on('click', '.edit-course', function() {
+                const courseName = $(this).data('course-name');
+                const courseDescription = $(this).data('course-description');
+                const courseMaxAttendees = $(this).data('course-max-attendees');
+
+                $('#edit-course-name').val(courseName);
+                $('#edit-course-description').val(courseDescription);
+                $('#edit-course-max-attendees').val(courseMaxAttendees);
+
+                $('#edit-course-modal').show();
+            });
+
+            // Hide edit modal
+            $('#cancel-edit').click(function(e) {
+                e.preventDefault();
+                $('#edit-course-modal').hide();
+            });
+
+            // Save course changes
+            $('#save-course-changes').click(function(e) {
+                e.preventDefault();
+                const courseName = $('#edit-course-name').val();
+                const courseData = {
+                    description: $('#edit-course-description').val(),
+                    max_attendees: parseInt($('#edit-course-max-attendees').val()),
+                };
+
+                $.ajax({
+                    url: `${apiUrl}/courses/${courseName}`,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(courseData),
+                    success: function() {
+                        $('#edit-course-modal').hide();
+                        fetchCourses();
+                    },
+                    error: function(xhr) {
+                        alert('Error updating course: ' + xhr.responseJSON.detail);
                     }
                 });
             });

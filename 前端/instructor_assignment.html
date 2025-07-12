@@ -75,6 +75,7 @@
                                     ${options}
                                 </select>
                                 <button class="bg-purple-500 text-white p-1 rounded assign-instructor" data-course-id="${course.id}" data-course-name="${course.name}">Assign</button>
+                                <button class="bg-teal-500 text-white p-1 rounded assign-instructor-adj" data-course-id="${course.id}" data-course-name="${course.name}">Assign with Adj.</button>
                             </td>
                         </tr>
                     `);
@@ -123,6 +124,32 @@
                 },
                 error: function(xhr) {
                     alert('Error assigning instructor: ' + xhr.responseJSON.detail);
+                }
+            });
+        });
+
+        // Assign an instructor with adjustment
+        $('#assignment-course-list').on('click', '.assign-instructor-adj', function() {
+            const courseId = $(this).data('course-id');
+            const courseName = $(this).data('course-name');
+            const instructorName = $(`#instructor-name-${courseId}`).val();
+
+            if (!instructorName) {
+                alert('Please select an instructor.');
+                return;
+            }
+
+            $.ajax({
+                url: `${apiUrl}/courses/${courseName}/assign_instructor_with_adjustment`,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ instructor_name: instructorName }),
+                success: function(response) {
+                    alert(response.message);
+                    fetchAssignmentCourses();
+                },
+                error: function(xhr) {
+                    alert('Error assigning instructor with adjustment: ' + xhr.responseJSON.detail);
                 }
             });
         });

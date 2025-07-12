@@ -13,13 +13,13 @@ from main import CourseManagementSystem, Course
 
 app = FastAPI()
 
-# 設定 CORS
+# Set up CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 這裡是允許所有來源
+    allow_origins=["*"],  # Allows all origins
     allow_credentials=True,
-    allow_methods=["*"],  # 允許所有 HTTP 方法
-    allow_headers=["*"],  # 允許所有標頭
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
 
 cms = CourseManagementSystem()
@@ -47,6 +47,20 @@ class EnrollmentRequest(BaseModel):
 
 class InstructorRequest(BaseModel):
     instructor_name: str
+
+class InstructorCreate(BaseModel):
+    name: str
+
+@app.post("/api/instructors", response_model=InstructorCreate)
+def create_instructor(instructor: InstructorCreate):
+    new_instructor = cms.add_instructor(instructor.name)
+    if new_instructor is None:
+        raise HTTPException(status_code=400, detail="Instructor with this name already exists")
+    return instructor
+
+@app.get("/api/instructors")
+def get_instructors():
+    return cms.get_all_instructors()
 
 @app.post("/api/courses", response_model=CourseCreate)
 def create_course(course: CourseCreate):

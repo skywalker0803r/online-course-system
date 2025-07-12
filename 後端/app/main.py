@@ -109,6 +109,9 @@ class CourseManagementSystem:
     def get_instructor(self, name):
         return self.instructors.get(name)
 
+    def get_all_instructors(self):
+        return list(self.instructors.values())
+
     def assign_instructor_to_course(self, instructor_name, course_name):
         course = self.get_course(course_name)
         instructor = self.get_instructor(instructor_name)

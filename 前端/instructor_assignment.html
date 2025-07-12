@@ -1,87 +1,133 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instructor Assignment</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body class="bg-gray-100">
+<div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-4">Instructor Management</h1>
 
-    <div class="container mx-auto p-4">
-        <h1 class="text-3xl font-bold mb-4">Instructor Assignment</h1>
-
-        <!-- Course List for Assignment -->
-        <div class="bg-white p-4 rounded-lg shadow-md">
-            <h2 class="text-2xl font-bold mb-2">Assign Instructor to Course</h2>
-            <table class="w-full">
-                <thead>
-                    <tr>
-                        <th class="text-left p-2">Name</th>
-                        <th class="text-left p-2">Assigned Instructor</th>
-                        <th class="text-left p-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="assignment-course-list">
-                    <!-- Course items will be inserted here -->
-                </tbody>
-            </table>
-        </div>
+    <!-- Add Instructor Form -->
+    <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+        <h2 class="text-2xl font-bold mb-2">Add New Instructor</h2>
+        <form id="add-instructor-form">
+            <input type="text" id="new-instructor-name" placeholder="Instructor Name" class="p-2 border rounded">
+            <button type="submit" class="bg-blue-500 text-white p-2 rounded">Add Instructor</button>
+        </form>
     </div>
 
-    <script>
-        $(document).ready(function() {
-            const apiUrl = 'http://127.0.0.1:8000/api';
+    <!-- Instructor List -->
+    <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+        <h2 class="text-2xl font-bold mb-2">Available Instructors</h2>
+        <ul id="instructor-list" class="list-disc pl-5">
+            <!-- Instructor items will be inserted here -->
+        </ul>
+    </div>
 
-            // Fetch and display courses for assignment
-            function fetchAssignmentCourses() {
-                $.get(`${apiUrl}/courses`, function(courses) {
-                    const courseList = $('#assignment-course-list');
-                    courseList.empty();
-                    courses.forEach(course => {
-                        courseList.append(`
-                            <tr>
-                                <td class="p-2">${course.name}</td>
-                                <td class="p-2">${course.assigned_instructor || 'Not Assigned'}</td>
-                                <td class="p-2">
-                                    <input type="text" id="instructor-name-${course.name}" placeholder="Instructor Name" class="p-1 border rounded">
-                                    <button class="bg-purple-500 text-white p-1 rounded assign-instructor" data-course-name="${course.name}">Assign</button>
-                                </td>
-                            </tr>
-                        `);
-                    });
-                });
-            }
+    <!-- Assign Instructor to Course -->
+    <div class="bg-white p-4 rounded-lg shadow-md">
+        <h2 class="text-2xl font-bold mb-2">Assign Instructor to Course</h2>
+        <table class="w-full">
+            <thead>
+                <tr>
+                    <th class="text-left p-2">Name</th>
+                    <th class="text-left p-2">Assigned Instructor</th>
+                    <th class="text-left p-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="assignment-course-list">
+                <!-- Course items will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+</div>
 
-            // Assign an instructor to a course
-            $('#assignment-course-list').on('click', '.assign-instructor', function() {
-                const courseName = $(this).data('course-name');
-                const instructorName = $(`#instructor-name-${courseName}`).val();
+<script>
+    $(document).ready(function() {
+        const apiUrl = 'http://127.0.0.1:8000/api';
 
-                if (!instructorName) {
-                    alert('Please enter an instructor name.');
-                    return;
-                }
-
-                $.ajax({
-                    url: `${apiUrl}/courses/${courseName}/assign_instructor`,
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ instructor_name: instructorName }),
-                    success: function() {
-                        fetchAssignmentCourses();
-                    },
-                    error: function(xhr) {
-                        alert('Error assigning instructor: ' + xhr.responseJSON.detail);
-                    }
+        // Fetch and display instructors
+        function fetchInstructors() {
+            $.get(`${apiUrl}/instructors`, function(instructors) {
+                const instructorList = $('#instructor-list');
+                instructorList.empty();
+                instructors.forEach(instructor => {
+                    instructorList.append(`<li>${instructor.name}</li>`);
                 });
             });
+        }
 
-            fetchAssignmentCourses();
+        // Fetch and display courses for assignment
+        function fetchAssignmentCourses() {
+            $.when(
+                $.get(`${apiUrl}/courses`),
+                $.get(`${apiUrl}/instructors`)
+            ).done(function(courses, instructors) {
+                const courseList = $('#assignment-course-list');
+                courseList.empty();
+                courses[0].forEach(course => {
+                    let options = '<option value="">Select Instructor</option>';
+                    instructors[0].forEach(instructor => {
+                        options += `<option value="${instructor.name}" ${course.assigned_instructor === instructor.name ? 'selected' : ''}>${instructor.name}</option>`;
+                    });
+
+                    courseList.append(`
+                        <tr>
+                            <td class="p-2">${course.name}</td>
+                            <td class="p-2">${course.assigned_instructor || 'Not Assigned'}</td>
+                            <td class="p-2">
+                                <select id="instructor-name-${course.id}" class="p-1 border rounded">
+                                    ${options}
+                                </select>
+                                <button class="bg-purple-500 text-white p-1 rounded assign-instructor" data-course-id="${course.id}" data-course-name="${course.name}">Assign</button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            });
+        }
+
+        // Add a new instructor
+        $('#add-instructor-form').submit(function(event) {
+            event.preventDefault();
+            const instructorName = $('#new-instructor-name').val();
+            $.ajax({
+                url: `${apiUrl}/instructors`,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ name: instructorName }),
+                success: function() {
+                    fetchInstructors();
+                    fetchAssignmentCourses();
+                    $('#add-instructor-form')[0].reset();
+                },
+                error: function(xhr) {
+                    alert('Error adding instructor: ' + xhr.responseJSON.detail);
+                }
+            });
         });
-    </script>
 
-</body>
-</html>
+        // Assign an instructor to a course
+        $('#assignment-course-list').on('click', '.assign-instructor', function() {
+            const courseId = $(this).data('course-id');
+            const courseName = $(this).data('course-name');
+            const instructorName = $(`#instructor-name-${courseId}`).val();
+
+            if (!instructorName) {
+                alert('Please select an instructor.');
+                return;
+            }
+
+            $.ajax({
+                url: `${apiUrl}/courses/${courseName}/assign_instructor`,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ instructor_name: instructorName }),
+                success: function() {
+                    fetchAssignmentCourses();
+                },
+                error: function(xhr) {
+                    alert('Error assigning instructor: ' + xhr.responseJSON.detail);
+                }
+            });
+        });
+
+        fetchInstructors();
+        fetchAssignmentCourses();
+    });
+</script>

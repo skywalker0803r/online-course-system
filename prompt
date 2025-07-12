@@ -1,0 +1,13 @@
+✦ 根據 guideline/first-month-mission.md 的要求
+你目前在 benchmarks/online-course-system 專案中已完成以下部分：
+   1. 選擇了後端 Benchmark。
+   2. 定義了系統主題為「線上課程報名與管理系統」。
+   3. 設計了符合數量和類型要求的 API 端點 (9 個 API，其中 6 個修改資料，3 個查詢資料)。
+   4. 明確指定了具備複雜邏輯的 API (/courses/{courseId}/assignInstructor)，並說明了其複雜度要求。
+   5. 撰寫了系統功能概述文件 (requirement.md)。
+   6. 撰寫了對應的 Feature Files (CourseManagement.feature, CourseEnrollment.feature, InstructorAssignment.feature)。
+   7. 建立了符合規範的資料夾結構，包括 api/ (並新增了 online_course_api.yaml)、後端/features/、後端/app/、AUTHOR、README.md 和 requirement.md。
+
+  目前主要尚未完成的部分是：
+   * 實作後端系統程式碼：在 benchmarks/online-course-system/後端/app 目錄下，根據 Feature Files 的定義，編寫實際的後端 API 實現程式碼。
+   * 驗證程式碼通過 Feature Files 測試：確保你實作的後端程式碼能夠完整通過所有 Feature Files 所定義的 End-to-End (API) 測試。

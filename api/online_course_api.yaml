@@ -1,0 +1,316 @@
+openapi: 3.0.0
+info:
+  title: Online Course Enrollment and Management System API
+  version: 1.0.0
+  description: API for managing online courses, enrollments, and instructor assignments.
+
+servers:
+  - url: /api/v1
+
+paths:
+  /courses:
+    post:
+      summary: Add a new course
+      operationId: addCourse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCourse'
+      responses:
+        '201':
+          description: Course created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: Invalid input
+    get:
+      summary: Get all courses
+      operationId: getAllCourses
+      responses:
+        '200':
+          description: A list of courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+
+  /courses/{courseId}:
+    parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ID of the course to manage
+    put:
+      summary: Update course information
+      operationId: updateCourseInformation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCourse'
+      responses:
+        '200':
+          description: Course updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: Invalid input
+        '404':
+          description: Course not found
+    delete:
+      summary: Delete a course
+      operationId: deleteCourse
+      responses:
+        '204':
+          description: Course deleted successfully
+        '400':
+          description: Course has enrollments and cannot be deleted
+        '404':
+          description: Course not found
+    get:
+      summary: Get course details
+      operationId: getCourseDetails
+      responses:
+        '200':
+          description: Course details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetails'
+        '404':
+          description: Course not found
+
+  /enrollments:
+    post:
+      summary: Enroll in a course
+      operationId: enrollCourse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEnrollment'
+      responses:
+        '201':
+          description: Enrollment successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+        '400':
+          description: Invalid input or course full/already enrolled
+
+  /enrollments/{enrollmentId}:
+    parameters:
+      - name: enrollmentId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ID of the enrollment to cancel
+    delete:
+      summary: Cancel enrollment
+      operationId: cancelEnrollment
+      responses:
+        '204':
+          description: Enrollment cancelled successfully
+        '404':
+          description: Enrollment not found
+
+  /users/{userId}/enrollments:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ID of the user
+    get:
+      summary: Get user enrollments
+      operationId: getUserEnrollments
+      responses:
+        '200':
+          description: A list of user enrollments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Enrollment'
+        '404':
+          description: User not found
+
+  /courses/{courseId}/assignInstructor:
+    parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ID of the course to assign instructor to
+    post:
+      summary: Assign instructor to a course
+      operationId: assignInstructor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignInstructorRequest'
+      responses:
+        '200':
+          description: Instructor assigned successfully
+        '400':
+          description: Invalid input or conflict (e.g., instructor unavailable)
+        '404':
+          description: Course or instructor not found
+
+components:
+  schemas:
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the course
+        name:
+          type: string
+          description: Name of the course
+        description:
+          type: string
+          description: Description of the course
+        maxAttendees:
+          type: integer
+          description: Maximum number of attendees for the course
+        status:
+          type: string
+          enum: [active, inactive, full]
+          description: Current status of the course
+      required:
+        - id
+        - name
+        - maxAttendees
+        - status
+
+    NewCourse:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the new course
+        description:
+          type: string
+          description: Description of the new course
+        maxAttendees:
+          type: integer
+          description: Maximum number of attendees for the new course
+      required:
+        - name
+        - maxAttendees
+
+    UpdateCourse:
+      type: object
+      properties:
+        name:
+          type: string
+          description: New name of the course
+        description:
+          type: string
+          description: New description of the course
+        maxAttendees:
+          type: integer
+          description: New maximum number of attendees
+        status:
+          type: string
+          enum: [active, inactive, full]
+          description: New status of the course
+
+    CourseDetails:
+      allOf:
+        - $ref: '#/components/schemas/Course'
+        - type: object
+          properties:
+            currentAttendees:
+              type: integer
+              description: Current number of attendees for the course
+            instructorId:
+              type: string
+              format: uuid
+              description: ID of the assigned instructor (if any)
+
+    Enrollment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the enrollment
+        courseId:
+          type: string
+          format: uuid
+          description: ID of the enrolled course
+        userId:
+          type: string
+          format: uuid
+          description: ID of the user who enrolled
+        enrollmentDate:
+          type: string
+          format: date-time
+          description: Date and time of enrollment
+      required:
+        - id
+        - courseId
+        - userId
+        - enrollmentDate
+
+    NewEnrollment:
+      type: object
+      properties:
+        courseId:
+          type: string
+          format: uuid
+          description: ID of the course to enroll in
+        userId:
+          type: string
+          format: uuid
+          description: ID of the user enrolling
+      required:
+        - courseId
+        - userId
+
+    AssignInstructorRequest:
+      type: object
+      properties:
+        instructorId:
+          type: string
+          format: uuid
+          description: ID of the instructor to assign
+        assignmentDate:
+          type: string
+          format: date
+          description: Date for the instructor assignment (e.g., course start date)
+        startTime:
+          type: string
+          format: time
+          description: Start time of the assignment
+        endTime:
+          type: string
+          format: time
+          description: End time of the assignment
+      required:
+        - instructorId
+        - assignmentDate
+        - startTime
+        - endTime

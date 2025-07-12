@@ -107,6 +107,17 @@ class CourseManagementSystem:
     def get_instructor(self, name):
         return self.instructors.get(name)
 
-    def assign_instructor(self, instructor_name, course_name):
-        # This method will be implemented in the next step
-        pass
+    def assign_instructor_to_course(self, instructor_name, course_name):
+        course = self.get_course(course_name)
+        instructor = self.get_instructor(instructor_name)
+        if course and instructor:
+            course.assigned_instructor = instructor_name
+            instructor.schedule.append(course_name)
+            return True
+        return False
+
+    def is_instructor_assigned_to_course(self, instructor_name, course_name):
+        course = self.get_course(course_name)
+        if course and course.assigned_instructor == instructor_name:
+            return True
+        return False

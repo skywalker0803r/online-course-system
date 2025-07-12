@@ -1,37 +1,12 @@
-# Task
-請你嚴格遵照「行為驅動開發 (BDD)」的方式，來完成 @後端\features 中所有驗收情境的開發。
-不可同時進行 BDD 開發流程中多個步驟也不能略過任何一步驟，必須一步一步扎實執行並確認每一步的結果。
-
-# Context
-
-## Design Guideline
-- 參考 OOP程式設計，你可視情況增加新的類別、屬性或行為。
-
-## Tech Stack
-1. Language Env：python
-2. BDD Test framework: behave
-3. Native test framework: pytest
-
-## Application Environment
-1. App 類型：純模組程式碼
-2. 此 feature file 中的所有邏輯存放至 後端\app\main.py 中
-3. 此 feature file 中的所有test存放至 後端\features\steps 中
-
-# BDD 開發流程
-1. 嚴格遵守 BDD 以及最小增量原則來開發所有程式碼，針對所有 scenario，一次開發一個 scenario，依序進行：
-    A. 一次從 後端\features 中選擇一個 scenario 實作，
-    除此 scenario 之外的測試全部都 ignore。在 後端\features\steps 撰寫此 scenario 對應的 Steps (given, when, then)、
-    在 後端\app\main.py 中 開啟相關類別，但是每個類別的行為都不實作，並且執行測試，
-    確認測試失敗 (test fail)，並且測試失敗的原因並非框架層級的錯誤，
-    而是期望的「值」上的錯誤。嚴格確認這步驟完成後才能進行下一步的實作。
-    
-    B. 為了通過上一步所撰寫的測試程式碼，請 在 後端\app\main.py 中 實作相關類別所需的程式碼，並確認能讓所有的測試程式碼都通過。
-    請嚴格確認有執行到測試程式碼，從 test report 中覆述一次目前 test passed 的數量。
-
-    C. 遵守 clean code 原則，思考是否要重構 在 後端\app\main.py 中 每個類別的內部程式碼，如果必要重構的話，
-    在重構完成之後，再執行一次測試，確保所有測試仍然通過，否則需修正邏輯直到測試全數通過。
-
-如果發現自己在繞圈圈同樣的error重複三次解不了停下來問我
-
-以上提示詞其實之前請你執行到一半 因為故障退出了
-所以請你先behave 後端/features 看看那些scenario已經通過測試 那些失敗 那些跳過 那些還沒實作 之後告訴我問題 以及你打算怎麼做
+參考requirement.md做一個線上課程報名與管理系統
+後端\app\main.py已經實作了所有線上課程報名與管理系統的邏輯
+你只需要採用fastapi再寫一個api_server.py去import\app\main.py裡面的功能即可
+api_server.py 跑起來會開一個URL出來
+然後創一個前端資料夾裡面放HTML/Tailwind CSS/jQuery 用API的方式跟我的api_server.py做串接
+前端要有UI真的能用滑鼠鍵盤來操作的介面 
+有
+課程管理
+課程報名與取消
+講師分配與排程
+三個頁面
+並且是真的能用UI操作實現所有的後端\features中定義的Scenario喔

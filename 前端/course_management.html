@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">Course Management</h1>
+
+        <!-- Add Course Form -->
+        <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+            <h2 class="text-2xl font-bold mb-2">Add New Course</h2>
+            <form id="add-course-form">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="new-course-name" placeholder="Course Name" class="p-2 border rounded">
+                    <input type="text" id="new-course-description" placeholder="Description" class="p-2 border rounded">
+                    <input type="number" id="new-course-max-attendees" placeholder="Max Attendees" class="p-2 border rounded">
+                    <input type="text" id="new-course-start-time" placeholder="Start Time (HH:MM)" class="p-2 border rounded">
+                    <input type="text" id="new-course-end-time" placeholder="End Time (HH:MM)" class="p-2 border rounded">
+                </div>
+                <button type="submit" class="mt-4 bg-blue-500 text-white p-2 rounded">Add Course</button>
+            </form>
+        </div>
+
+        <!-- Course List -->
+        <div class="bg-white p-4 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-2">Course List</h2>
+            <table class="w-full">
+                <thead>
+                    <tr>
+                        <th class="text-left p-2">Name</th>
+                        <th class="text-left p-2">Description</th>
+                        <th class="text-left p-2">Max Attendees</th>
+                        <th class="text-left p-2">Start Time</th>
+                        <th class="text-left p-2">End Time</th>
+                        <th class="text-left p-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="course-list">
+                    <!-- Course items will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const apiUrl = 'http://127.0.0.1:8000/api';
+
+            // Fetch and display courses
+            function fetchCourses() {
+                $.get(`${apiUrl}/courses`, function(courses) {
+                    const courseList = $('#course-list');
+                    courseList.empty();
+                    courses.forEach(course => {
+                        courseList.append(`
+                            <tr>
+                                <td class="p-2">${course.name}</td>
+                                <td class="p-2">${course.description}</td>
+                                <td class="p-2">${course.max_attendees}</td>
+                                <td class="p-2">${course.start_time}</td>
+                                <td class="p-2">${course.end_time}</td>
+                                <td class="p-2">
+                                    <button class="bg-red-500 text-white p-1 rounded delete-course" data-course-name="${course.name}">Delete</button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+                });
+            }
+
+            // Add a new course
+            $('#add-course-form').submit(function(event) {
+                event.preventDefault();
+                const courseData = {
+                    name: $('#new-course-name').val(),
+                    description: $('#new-course-description').val(),
+                    max_attendees: parseInt($('#new-course-max-attendees').val()),
+                    start_time: $('#new-course-start-time').val(),
+                    end_time: $('#new-course-end-time').val(),
+                };
+
+                $.ajax({
+                    url: `${apiUrl}/courses`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(courseData),
+                    success: function() {
+                        fetchCourses();
+                        $('#add-course-form')[0].reset();
+                    },
+                    error: function(xhr) {
+                        alert('Error adding course: ' + xhr.responseJSON.detail);
+                    }
+                });
+            });
+
+            // Delete a course
+            $('#course-list').on('click', '.delete-course', function() {
+                const courseName = $(this).data('course-name');
+                $.ajax({
+                    url: `${apiUrl}/courses/${courseName}`,
+                    type: 'DELETE',
+                    success: function() {
+                        fetchCourses();
+                    },
+                    error: function(xhr) {
+                        alert('Error deleting course: ' + xhr.responseJSON.detail);
+                    }
+                });
+            });
+
+            fetchCourses();
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Enrollment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">Course Enrollment</h1>
+
+        <!-- User ID Input -->
+        <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+            <label for="user-id" class="block text-lg font-medium">Enter Your User ID:</label>
+            <input type="text" id="user-id" placeholder="Your User ID" class="p-2 border rounded w-full">
+        </div>
+
+        <!-- Course List for Enrollment -->
+        <div class="bg-white p-4 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-2">Available Courses</h2>
+            <table class="w-full">
+                <thead>
+                    <tr>
+                        <th class="text-left p-2">Name</th>
+                        <th class="text-left p-2">Description</th>
+                        <th class="text-left p-2">Enrolled/Max</th>
+                        <th class="text-left p-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="enrollment-course-list">
+                    <!-- Course items will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- User's Enrolled Courses -->
+        <div class="bg-white p-4 rounded-lg shadow-md mt-4">
+            <h2 class="text-2xl font-bold mb-2">My Enrollments</h2>
+            <table class="w-full">
+                <thead>
+                    <tr>
+                        <th class="text-left p-2">Name</th>
+                        <th class="text-left p-2">Description</th>
+                        <th class="text-left p-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="user-enrollments-list">
+                    <!-- User's enrolled courses will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const apiUrl = 'http://127.0.0.1:8000/api';
+            let userId = '';
+
+            // Fetch and display courses for enrollment
+            function fetchEnrollmentCourses() {
+                $.get(`${apiUrl}/courses`, function(courses) {
+                    const courseList = $('#enrollment-course-list');
+                    courseList.empty();
+                    courses.forEach(course => {
+                        courseList.append(`
+                            <tr>
+                                <td class="p-2">${course.name}</td>
+                                <td class="p-2">${course.description}</td>
+                                <td class="p-2">${course.enrollments.length} / ${course.max_attendees}</td>
+                                <td class="p-2">
+                                    <button class="bg-green-500 text-white p-1 rounded enroll-course" data-course-name="${course.name}">Enroll</button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+                });
+            }
+
+            // Fetch and display user's enrollments
+            function fetchUserEnrollments() {
+                if (userId) {
+                    $.get(`${apiUrl}/users/${userId}/enrollments`, function(enrollments) {
+                        const userEnrollmentsList = $('#user-enrollments-list');
+                        userEnrollmentsList.empty();
+                        enrollments.forEach(course => {
+                            userEnrollmentsList.append(`
+                                <tr>
+                                    <td class="p-2">${course.name}</td>
+                                    <td class="p-2">${course.description}</td>
+                                    <td class="p-2">
+                                        <button class="bg-yellow-500 text-white p-1 rounded cancel-enrollment" data-course-name="${course.name}">Cancel</button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    });
+                }
+            }
+
+            // Handle User ID input change
+            $('#user-id').on('change', function() {
+                userId = $(this).val();
+                fetchUserEnrollments();
+            });
+
+            // Enroll in a course
+            $('#enrollment-course-list').on('click', '.enroll-course', function() {
+                if (!userId) {
+                    alert('Please enter your User ID first.');
+                    return;
+                }
+                const courseName = $(this).data('course-name');
+                $.ajax({
+                    url: `${apiUrl}/courses/${courseName}/enroll`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ user_id: userId, course_name: courseName }),
+                    success: function() {
+                        fetchEnrollmentCourses();
+                        fetchUserEnrollments();
+                    },
+                    error: function(xhr) {
+                        alert('Error enrolling in course: ' + xhr.responseJSON.detail);
+                    }
+                });
+            });
+
+            // Cancel an enrollment
+            $('#user-enrollments-list').on('click', '.cancel-enrollment', function() {
+                const courseName = $(this).data('course-name');
+                $.ajax({
+                    url: `${apiUrl}/courses/${courseName}/cancel`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ user_id: userId, course_name: courseName }),
+                    success: function() {
+                        fetchEnrollmentCourses();
+                        fetchUserEnrollments();
+                    },
+                    error: function(xhr) {
+                        alert('Error cancelling enrollment: ' + xhr.responseJSON.detail);
+                    }
+                });
+            });
+
+            fetchEnrollmentCourses();
+        });
+    </script>
+
+</body>
+</html>

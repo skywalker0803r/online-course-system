@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Assignment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">Instructor Assignment</h1>
+
+        <!-- Course List for Assignment -->
+        <div class="bg-white p-4 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-2">Assign Instructor to Course</h2>
+            <table class="w-full">
+                <thead>
+                    <tr>
+                        <th class="text-left p-2">Name</th>
+                        <th class="text-left p-2">Assigned Instructor</th>
+                        <th class="text-left p-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="assignment-course-list">
+                    <!-- Course items will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const apiUrl = 'http://127.0.0.1:8000/api';
+
+            // Fetch and display courses for assignment
+            function fetchAssignmentCourses() {
+                $.get(`${apiUrl}/courses`, function(courses) {
+                    const courseList = $('#assignment-course-list');
+                    courseList.empty();
+                    courses.forEach(course => {
+                        courseList.append(`
+                            <tr>
+                                <td class="p-2">${course.name}</td>
+                                <td class="p-2">${course.assigned_instructor || 'Not Assigned'}</td>
+                                <td class="p-2">
+                                    <input type="text" id="instructor-name-${course.name}" placeholder="Instructor Name" class="p-1 border rounded">
+                                    <button class="bg-purple-500 text-white p-1 rounded assign-instructor" data-course-name="${course.name}">Assign</button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+                });
+            }
+
+            // Assign an instructor to a course
+            $('#assignment-course-list').on('click', '.assign-instructor', function() {
+                const courseName = $(this).data('course-name');
+                const instructorName = $(`#instructor-name-${courseName}`).val();
+
+                if (!instructorName) {
+                    alert('Please enter an instructor name.');
+                    return;
+                }
+
+                $.ajax({
+                    url: `${apiUrl}/courses/${courseName}/assign_instructor`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ instructor_name: instructorName }),
+                    success: function() {
+                        fetchAssignmentCourses();
+                    },
+                    error: function(xhr) {
+                        alert('Error assigning instructor: ' + xhr.responseJSON.detail);
+                    }
+                });
+            });
+
+            fetchAssignmentCourses();
+        });
+    </script>
+
+</body>
+</html>

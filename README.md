@@ -22,22 +22,23 @@
 
 ```bash
 behave 後端/features -f behave_html_formatter:HTMLFormatter -o report/report.html
+```
 
-實際使用
+## 實際使用
 啟動後端服務
 在後端資料夾執行以下命令啟動 API 伺服器：
 
-bash
-複製
-編輯
-python 後端/app/api_server.py
+```bash
+python app/api_server.py
+```
+
 啟動前端服務
 切換到前端資料夾並啟動靜態文件伺服器：
 
-bash
-複製
-編輯
+```bash
 cd 前端
 python -m http.server 5000
-訪問系統
+```
+
+## 訪問系統
 打開瀏覽器，訪問 127.0.0.1:5000，您將看到主頁 mainpage.png。

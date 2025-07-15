@@ -24,6 +24,8 @@
 behave 後端/features -f behave_html_formatter:HTMLFormatter -o report/report.html
 ```
 
+![測試報告](./report/testreport.png)
+
 ## 實際使用
 啟動後端服務
 在後端資料夾執行以下命令啟動 API 伺服器：
@@ -41,4 +43,6 @@ python -m http.server 5000
 ```
 
 ## 訪問系統
-打開瀏覽器，訪問 127.0.0.1:5000，您將看到主頁 mainpage.png。
+打開瀏覽器，訪問 127.0.0.1:5000，您將看到主頁 
+
+![主頁](./前端/mainpage.png)
